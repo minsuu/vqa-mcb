@@ -23,9 +23,10 @@ def trim_image(img, resnet_mean):
     return ivec
 
 def extract_features(target_data, output_data):
-    target_path = os.path.join(config.COCO_IMAGE_PATH, target_data)
+    target_path = os.path.join(config.IMAGE_PATH, target_data)
     output_path = os.path.join(config.OUTPUT_PATH, output_data)
-    os.makedirs(output_path) # will raise exception if directory exists
+    if not os.path.isdir(output_path):
+        os.makedirs(output_path) # will raise exception if directory exists
 
     caffe.set_device(config.GPU_ID)
     caffe.set_mode_gpu()
@@ -44,10 +45,13 @@ def extract_features(target_data, output_data):
 
     print resnet_mean[:,:4,:4]
     cv2.imwrite('./resnet_mean.png',np.transpose(resnet_mean,(1,2,0)))
+    mx = len(os.listdir(target_path))
 
     for i,t_img_filename in enumerate(os.listdir(target_path)):
-        
+
         if os.path.isfile(os.path.join(output_path, t_img_filename + '.npz')):
+            continue
+        if os.path.splitext(t_img_filename)[1] != '.png':
             continue
 
         t_img_path =  os.path.join(target_path, t_img_filename)
@@ -69,6 +73,8 @@ def extract_features(target_data, output_data):
         t_start = time.time()
         np.savez_compressed(output_file_path, x=feature)
         t_end = time.time()
+        print i, '/', mx, 'done'
+        '''
         print '-------------------------', t_end - t_start
         print '   index            : ', i, n_data
         print '   target file      : ', t_img_path
@@ -79,10 +85,9 @@ def extract_features(target_data, output_data):
         print '   argmax,min sum f : ', feature.argmax(), feature.argmin(), feature.sum()
         #print '   feature[:5]      : ', feature[:5]
         #print '   feature[-5:]     : ', feature[-5:]
+        '''
     print("DONE")
 
 if __name__ == '__main__':
-    extract_features('train2014', config.OUTPUT_PREFIX + 'train2014')
-    extract_features('val2014', config.OUTPUT_PREFIX + 'val2014')
-    extract_features('test2015', config.OUTPUT_PREFIX + 'test2015')
+    extract_features( sys.argv[1], sys.argv[1])
     #extract_features('', config.OUTPUT_PREFIX + '')

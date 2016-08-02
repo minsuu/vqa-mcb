@@ -6,12 +6,14 @@ import os
 import sys
 import re
 import json
+import sputnik
 import spacy
 from operator import mul
 
 GLOVE_EMBEDDING_SIZE = 300
 
 CURRENT_DATA_SHAPE = None
+DATA_PATH = os.getcwd() + '/data/models/vqa/'
 
 class LoadVQADataProvider:
 
@@ -38,7 +40,8 @@ class LoadVQADataProvider:
         self.n_vocabulary, self.vdict = len(vdict), vdict
         self.n_ans_vocabulary, self.adict = len(adict), adict
 
-        self.nlp = spacy.load('en', vectors='en_glove_cc_300_1m_vectors')
+        sputnik.install('spacy', spacy.about.__version__, 'en_glove_cc_300_1m_vectors', data_path=DATA_PATH)
+        self.nlp = spacy.load('en', via=DATA_PATH, vectors='en_glove_cc_300_1m_vectors')
         self.glove_dict = {} # word -> glove vector
 
     def getQuesIds(self):
@@ -97,7 +100,7 @@ class LoadVQADataProvider:
                 raise Exception("This should not happen.")
         else:
             return random.choice(prob_answer_list)
- 
+
     def qlist_to_vec(self, max_length, q_list):
         """
         Converts a list of words into a format suitable for the embedding layer.
@@ -130,7 +133,7 @@ class LoadVQADataProvider:
                 cvec[i] = 0 if i == max_length - len(q_list) else 1
 
         return qvec, cvec, glove_matrix
- 
+
     def answer_to_vec(self, ans_str):
         """ Return answer id if the answer is included in vocaburary otherwise '' """
         if self.mode =='test-dev' or self.mode == 'test':
@@ -141,7 +144,7 @@ class LoadVQADataProvider:
         else:
             ans = self.adict['']
         return ans
- 
+
     def vec_to_answer(self, ans_symbol):
         """ Return answer id if the answer is included in vocaburary otherwise '' """
         if self.rev_adict is None:
@@ -151,7 +154,7 @@ class LoadVQADataProvider:
             self.rev_adict = rev_adict
 
         return self.rev_adict[ans_symbol]
- 
+
     def create_batch(self, question):
 
         qvec = (np.zeros(self.batchsize*self.max_length)).reshape(self.batchsize,self.max_length)
@@ -170,7 +173,7 @@ class LoadVQADataProvider:
 
         return qvec, cvec, avec, glove_matrix
 
- 
+
 
 
 class VQADataProviderLayer(caffe.Layer):

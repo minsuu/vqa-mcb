@@ -17,8 +17,8 @@ RESNET_MEAN_PATH = PREFIX + "/vqa_mcb/preprocess/ResNet_mean.binaryproto"
 # Download caffemodel from https://github.com/KaimingHe/deep-residual-networks
 RESNET_CAFFEMODEL_PATH = PREFIX + "/data/models/vqa/ResNet-152-model.caffemodel"
 
-IMAGE_PATH = PREFIX + "/vid/"
-OUTPUT_PATH = PREFIX + "/vid/"
+IMAGE_PATH = PREFIX + "/vid"
+OUTPUT_PATH = PREFIX + "/vid"
 OUTPUT_PREFIX = ""
 
 # Which layer to extract and the size of the layer
